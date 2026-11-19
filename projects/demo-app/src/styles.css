@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Tema Rick & Morty para ui-lib.
+ * La librería lee estas variables (formato "R G B") a través de su preset de Tailwind.
+ */
+@layer base {
+  :root {
+    color-scheme: dark;
+
+    --ui-color-primary: 151 206 76; /* verde portal #97CE4C */
+    --ui-color-primary-hover: 185 230 126;
+    --ui-color-on-primary: 12 24 8;
+    --ui-color-secondary: 155 231 244; /* celeste "bata de laboratorio" */
+    --ui-color-secondary-hover: 200 244 251;
+    --ui-color-danger: 225 60 82; /* rojo alarma */
+    --ui-color-danger-hover: 240 88 108;
+    --ui-color-on-danger: 255 255 255;
+    --ui-color-surface: 7 10 19;
+    --ui-color-surface-muted: 18 26 43;
+    --ui-color-surface-raised: 13 19 33;
+    --ui-color-border: 44 60 82;
+    --ui-color-text: 232 242 228;
+    --ui-color-text-muted: 150 168 186;
+    --ui-color-focus: 240 225 74; /* amarillo Morty */
+    --ui-color-skeleton: 70 94 120;
+  }
+
+  html {
+    @apply bg-space-900;
+  }
+
+  body {
+    @apply min-h-screen font-sans text-ui-text antialiased;
+    background-color: #070a13;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(255, 255, 255, 0.55), transparent 60%),
+      radial-gradient(1px 1px at 72% 12%, rgba(255, 255, 255, 0.45), transparent 60%),
+      radial-gradient(1.5px 1.5px at 38% 62%, rgba(255, 255, 255, 0.35), transparent 60%),
+      radial-gradient(1px 1px at 88% 74%, rgba(255, 255, 255, 0.5), transparent 60%),
+      radial-gradient(1px 1px at 22% 86%, rgba(255, 255, 255, 0.4), transparent 60%),
+      radial-gradient(1.5px 1.5px at 56% 32%, rgba(155, 231, 244, 0.5), transparent 60%),
+      radial-gradient(circle at 15% -10%, rgba(151, 206, 76, 0.18), transparent 45%),
+      radial-gradient(circle at 100% 40%, rgba(155, 231, 244, 0.1), transparent 40%),
+      radial-gradient(circle at 50% 120%, rgba(151, 206, 76, 0.12), transparent 50%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgb(151 206 76 / 0.35);
+  }
+}
+
+@layer utilities {
+  /* Contorno "slime" para títulos con la fuente display. */
+  .text-portal-glow {
+    text-shadow:
+      0 0 18px rgb(151 206 76 / 0.45),
+      0 2px 0 rgb(12 24 8 / 0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
