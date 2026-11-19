@@ -1,0 +1,41 @@
+{
+  "name": "my-workspace",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve demo-app",
+    "build": "ng build ui-lib && ng build demo-app",
+    "build:lib": "ng build ui-lib",
+    "build:demo": "ng build demo-app",
+    "watch:lib": "ng build ui-lib --watch --configuration development",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/common": "^19.2.0",
+    "@angular/compiler": "^19.2.0",
+    "@angular/core": "^19.2.0",
+    "@angular/forms": "^19.2.0",
+    "@angular/platform-browser": "^19.2.0",
+    "@angular/platform-browser-dynamic": "^19.2.0",
+    "@angular/router": "^19.2.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^19.2.27",
+    "@angular/cli": "^19.2.27",
+    "@angular/compiler-cli": "^19.2.0",
+    "@types/jest": "^29.5.14",
+    "autoprefixer": "^10.6.2",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jest-preset-angular": "^14.6.2",
+    "ng-packagr": "^19.2.0",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~5.7.2"
+  }
+}
