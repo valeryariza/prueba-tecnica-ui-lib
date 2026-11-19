@@ -1,0 +1,211 @@
+<div class="grid gap-6 lg:grid-cols-3">
+  <!-- Controles -->
+  <ui-card
+    class="lg:col-span-2"
+    title="Panel de control"
+    subtitle="Elige qué parte del multiverso quieres explorar."
+    elevation="flat"
+  >
+    <ui-button
+      uiCardHeaderActions
+      label="Limpiar filtro"
+      variant="secondary"
+      size="sm"
+      [disabled]="store.status() === null"
+      (clicked)="store.setStatus(null)"
+    />
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <ui-select
+        label="Recurso"
+        placeholder="Elige un recurso"
+        [options]="resourceOptions"
+        [value]="store.resource()"
+        hint="Cada recurso tiene sus propias columnas."
+        (selectionChange)="onResourceChange($event)"
+      />
+      <ui-select
+        label="Filtrar por status"
+        placeholder="Todos los status"
+        [options]="statusOptions"
+        [value]="store.status()"
+        [disabled]="!store.statusFilterEnabled() || store.loading()"
+        [hint]="
+          store.statusFilterEnabled()
+            ? 'Filtra a los personajes por su estado vital.'
+            : 'La API solo permite filtrar por status en Characters.'
+        "
+        (selectionChange)="onStatusChange($event)"
+      />
+    </div>
+  </ui-card>
+
+  <!-- Evidencia del output actionTriggered -->
+  <ui-card title="Último evento" subtitle="Output actionTriggered de ui-table" elevation="outlined">
+    @if (lastEvent(); as event) {
+      <pre
+        class="overflow-x-auto rounded-lg bg-space-900/70 p-3 font-mono text-xs leading-relaxed text-portal-300"
+      ><code>{{ '{' }} action: '{{ event.action }}',
+  row: {{ '{' }} id: {{ event.id }}, name: '{{ event.name }}' {{ '}' }} {{ '}' }}</code></pre>
+      <p class="mt-2 text-xs text-ui-text-muted">Recurso: {{ event.resource }} · también se registra en la consola.</p>
+    } @else {
+      <p class="text-sm text-ui-text-muted">
+        Pulsa <span class="font-semibold text-ui-text">Ver detalle</span> o
+        <span class="font-semibold text-ui-text">Eliminar</span> en cualquier fila para ver aquí lo que emite la tabla.
+      </p>
+    }
+  </ui-card>
+</div>
+
+<!-- Resultados -->
+<section class="mt-8" aria-labelledby="results-title">
+  <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+    <h2 id="results-title" class="font-display text-2xl capitalize tracking-wide text-rick sm:text-3xl">
+      {{ labels().many }}
+    </h2>
+    <p class="text-sm text-ui-text-muted" aria-live="polite">
+      @if (store.loading()) {
+        Abriendo portal…
+      } @else if (!store.error()) {
+        {{ summary() }}
+      }
+    </p>
+  </div>
+
+  @let records = store.records();
+  @if (records.type === 'character') {
+    <ui-table
+      class="animate-fade-in"
+      caption="Personajes"
+      [columns]="characterColumns"
+      [rows]="records.items"
+      [loading]="store.loading()"
+      [errorMessage]="store.error()"
+      [emptyMessage]="emptyMessage()"
+      [trackBy]="trackById"
+      (actionTriggered)="onTableAction({ type: 'character', item: $event.row }, $event.action)"
+      (retryRequested)="store.load()"
+    >
+      <app-portal uiTableEmpty size="md" />
+    </ui-table>
+  } @else if (records.type === 'episode') {
+    <ui-table
+      class="animate-fade-in"
+      caption="Episodios"
+      [columns]="episodeColumns"
+      [rows]="records.items"
+      [loading]="store.loading()"
+      [errorMessage]="store.error()"
+      [emptyMessage]="emptyMessage()"
+      [trackBy]="trackById"
+      (actionTriggered)="onTableAction({ type: 'episode', item: $event.row }, $event.action)"
+      (retryRequested)="store.load()"
+    >
+      <app-portal uiTableEmpty size="md" />
+    </ui-table>
+  } @else {
+    <ui-table
+      class="animate-fade-in"
+      caption="Ubicaciones"
+      [columns]="locationColumns"
+      [rows]="records.items"
+      [loading]="store.loading()"
+      [errorMessage]="store.error()"
+      [emptyMessage]="emptyMessage()"
+      [trackBy]="trackById"
+      (actionTriggered)="onTableAction({ type: 'location', item: $event.row }, $event.action)"
+      (retryRequested)="store.load()"
+    >
+      <app-portal uiTableEmpty size="md" />
+    </ui-table>
+  }
+
+  <!-- Paginación -->
+  @if (store.totalPages() > 1 || store.loading()) {
+    <nav class="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row" aria-label="Paginación">
+      <p class="text-sm text-ui-text-muted">
+        Página <span class="font-semibold text-ui-text">{{ store.page() }}</span> de
+        {{ store.totalPages() || '…' }}
+      </p>
+      <div class="flex gap-2">
+        <ui-button
+          label="← Anterior"
+          variant="secondary"
+          size="sm"
+          [disabled]="!store.hasPrevPage()"
+          [loading]="store.loading() && store.hasPrevPage()"
+          (clicked)="store.prevPage()"
+        />
+        <ui-button
+          label="Siguiente →"
+          variant="primary"
+          size="sm"
+          [disabled]="!store.hasNextPage()"
+          [loading]="store.loading() && store.hasNextPage()"
+          (clicked)="store.nextPage()"
+        />
+      </div>
+    </nav>
+  }
+</section>
+
+<!-- Modal de detalle -->
+@if (detail(); as selection) {
+  <app-modal labelledBy="detail-title" (closed)="detail.set(null)">
+    <ui-card
+      titleId="detail-title"
+      elevation="raised"
+      [title]="selection.item.name"
+      [subtitle]="detailSubtitle()"
+      [interactiveHeader]="true"
+      (headerClicked)="showRawJson.set(!showRawJson())"
+    >
+      <ui-button uiCardHeaderActions label="✕" ariaLabel="Cerrar detalle" variant="secondary" size="sm" (clicked)="detail.set(null)" />
+
+      <p class="mb-4 text-xs text-ui-text-muted">
+        Consejo: haz clic en el título para alternar entre la vista y el JSON original.
+      </p>
+
+      @if (showRawJson()) {
+        <pre class="max-h-[50vh] overflow-auto rounded-lg bg-space-900/70 p-4 font-mono text-xs text-portal-300">{{ selection.item | json }}</pre>
+      } @else if (selection.type === 'character') {
+        <app-character-detail [character]="selection.item" />
+      } @else if (selection.type === 'episode') {
+        <app-episode-detail [episode]="selection.item" />
+      } @else {
+        <app-location-detail [location]="selection.item" />
+      }
+
+      <div uiCardFooter>
+        <ui-button label="Cerrar" variant="primary" (clicked)="detail.set(null)" />
+      </div>
+    </ui-card>
+  </app-modal>
+}
+
+<!-- Confirmación de eliminación -->
+@if (pendingDelete(); as selection) {
+  <app-modal labelledBy="confirm-title" widthClass="max-w-md" (closed)="pendingDelete.set(null)">
+    <ui-card titleId="confirm-title" title="¿Eliminar este registro?" [subtitle]="selection.item.name" elevation="raised">
+      <p class="text-sm leading-relaxed text-ui-text-muted">
+        Se quitará <span class="font-semibold text-ui-text">«{{ selection.item.name }}»</span> de la tabla. La Rick and
+        Morty API es de solo lectura, así que volverá a aparecer si recargas o cambias de página.
+      </p>
+      <div uiCardFooter>
+        <ui-button label="Cancelar" variant="secondary" (clicked)="pendingDelete.set(null)" />
+        <ui-button label="Sí, eliminar" variant="danger" (clicked)="confirmDelete()" />
+      </div>
+    </ui-card>
+  </app-modal>
+}
+
+<!-- Toast -->
+<div class="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4" role="status" aria-live="polite">
+  @if (toast(); as message) {
+    <p
+      class="pointer-events-auto animate-pop-in rounded-xl border border-portal-400/40 bg-space-700/95 px-4 py-3 text-sm shadow-xl shadow-black/40"
+    >
+      <span class="mr-1 text-portal-400">●</span> {{ message }}
+    </p>
+  }
+</div>
