@@ -86,18 +86,30 @@ Esto fue lo que salió mal en la primera versión del código generado y cómo s
 - **Commit mal etiquetado:** el store se había marcado como `refactor:` cuando en realidad es una funcionalidad nueva; se cambió a `feat:`.
 - **Google Fonts → Fontsource**, por el error de build descrito en Retos.
 
-### Revisión propia (completar antes de entregar)
-
-> ⚠️ Esta sección la debe escribir la autora con sus palabras, después de revisar el código. La prueba evalúa poder explicar y defender cada parte.
+### Revisión propia
 
 **Qué acepté y por qué:**
-- _…_
+- **La estructura del workspace** (`ui-lib` + `demo-app`, con `public-api.ts` como único punto de entrada). Es lo que pide el enunciado y evita que la demo importe archivos internos de la librería.
+- **Los cuatro componentes con la Signals API** (`input()`, `output()`, `model()`), standalone y OnPush. Cumplen las convenciones obligatorias y no usan `@Input()` / `@Output()` ni `any`.
+- **La tabla genérica** (`ui-table<T>`): no conoce el dominio, solo renderiza columnas y emite `{ action, row }`. El padre decide qué hacer con cada acción.
+- **El estado en `ExplorerStore` con signals y `switchMap`.** Los componentes no hacen HTTP, y si el usuario cambia de recurso rápido se cancela la petición anterior.
+- **Tratar el 404 de la API como lista vacía.** La API responde 404 cuando un filtro no tiene resultados, y eso no es un error de red.
+- **Deshabilitar el filtro de status en Episodes y Locations,** porque en la API solo existe el campo `status` en Characters.
+- **Los temas con variables CSS** para que la librería no tenga colores fijos y la demo aplique el tema Rick & Morty.
+
+**Qué comprobé yo misma:**
+- Instalé las dependencias y levanté la app con `ng serve`. Funciona con la API real: en Episodes carga los 51 episodios y el filtro de status queda deshabilitado.
+- Ejecuté el flujo completo: cambio de recurso, filtro, modal de detalle, eliminar con confirmación y paginación.
+- Cambié el autor de los commits a mi nombre y correo, y apunté el repositorio al mío en GitHub, porque el zip traía un `origin` de otro entorno.
 
 **Qué modifiqué o rechacé y por qué:**
-- _…_
+- En el código no he cambiado nada: lo dejé como se generó, después de revisarlo y probarlo.
+- Los ajustes que hice fueron de entorno y Git: aprobar los scripts de `esbuild` que bloqueó npm, hacer un commit con el `package-lock.json` actualizado por mi instalación y corregir la URL del remoto.
 
-**Prompts adicionales que usé (si los hubo):**
-- _…_
+**Prompts adicionales que usé:**
+- "mandalo todo completo" (pedí el proyecto completo a partir del PDF).
+- "dime paso a paso que hago desde el principio" (pedí la guía para instalar, ejecutar y subir el proyecto).
+- Después consulté los errores de terminal que me salieron (`approve-scripts`, `cannot rebase: You have unstaged changes` y `remote origin already exists`) y seguí las soluciones.
 
 Lista de preguntas para practicar antes de la revisión:
 - [ ] ¿Por qué `input()` / `output()` / `model()` en lugar de `@Input()` / `@Output()`? ¿Qué gana OnPush con signals?
